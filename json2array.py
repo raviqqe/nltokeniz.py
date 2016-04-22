@@ -2,6 +2,7 @@
 
 import docopt
 import json
+import multiprocessing
 import numpy
 import sys
 
@@ -23,13 +24,14 @@ def word_list_to_int_list(word_list):
 def format_int_list(the_list, sizes):
   assert all(isinstance(hier, int) and hier > 0 for hier in sizes.keys())
 
+  if not isinstance(the_list, list):
+    return the_list
+
   hier = hierarchy(the_list)
   size = sizes[hier]
 
-  formated_sub_lists = [format_int_list(sub_list) for sub_list in the_list]
-
-  if size is None:
-    return formated_sub_lists
+  formated_sub_lists = [format_int_list(sub_list, sizes)
+                        for sub_list in the_list]
 
   return formated_sub_lists[:size] \
          if len(the_list) >= size else \
@@ -48,13 +50,23 @@ def hierarchy(the_list):
   return hierarchy(the_list[0]) + 1
 
 
+def format_document(document, sizes):
+  return format_int_list(word_list_to_int_list(document), sizes)
+
+
+def repeat(x):
+  while True:
+    yield x
+
+
 
 # main routine
 
 def main(args):
   """
   Usage:
-    json2array [<json_document_filename>] <numpy_array_file>
+    json2array -w <length> -s <length> -d <length>
+               [<json_document_filename>] <numpy_array_file>
 
   Options:
     -w --max-word-length <word_length>
@@ -69,15 +81,16 @@ def main(args):
   else:
     json_documents = sys.stdin.read()
 
-  numpy.array(format_int_list(
-    word_list_to_int_list(json.loads(json_documents)),
-    {
-      1 : int(args["--max-word-length"]),
-      2 : int(args["--max-sentence-length"]),
-      3 : int(args["--max-document-length"]),
-      4 : None
-    }
-  )).dump(args["<numpy_array_file>"])
+  sizes = {
+    1 : int(args["--max-word-length"]),
+    2 : int(args["--max-sentence-length"]),
+    3 : int(args["--max-document-length"]),
+  }
+
+  numpy.array(multiprocessing.Pool().starmap(
+    format_document,
+    zip(json.loads(json_documents), repeat(sizes)))
+  ).dump(args["<numpy_array_file>"])
 
 
 if __name__ == "__main__":
