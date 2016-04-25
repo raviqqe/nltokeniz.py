@@ -16,13 +16,16 @@ UNKNOWN_CHAR = '\x01'
 NULL_WORD = NULL_CHAR
 UNKNOWN_WORD = UNKNOWN_CHAR
 
+CHAR_DATATYPE = numpy.int32
+
+
 
 # functions
 
 ## utils
 
 def array(sequence):
-  return numpy.array(list(sequence), dtype=numpy.int32)
+  return numpy.array(list(sequence), dtype=CHAR_DATATYPE)
 
 
 ## word indices
@@ -40,7 +43,8 @@ def create_word_indices(documents):
 ## word array
 
 def create_word_array(word_indices, word_length):
-  word_array = numpy.zeros((len(word_indices), word_length))
+  word_array = numpy.zeros((len(word_indices), word_length),
+                           dtype=CHAR_DATATYPE)
 
   for word, index in word_indices.items():
     word_array[index] = word_to_array(word, word_length)
