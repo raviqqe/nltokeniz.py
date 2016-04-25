@@ -22,7 +22,7 @@ UNKNOWN_WORD = UNKNOWN_CHAR
 ## utils
 
 def array(sequence):
-  return numpy.array(list(sequence), dtype=numpy.int64)
+  return numpy.array(list(sequence), dtype=numpy.int32)
 
 
 ## word indices
