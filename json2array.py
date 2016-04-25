@@ -10,36 +10,104 @@ import sys
 
 # constants
 
-NULL_CHAR = 0
+NULL_CHAR = '\x00'
+UNKNOWN_CHAR = '\x01'
+
+NULL_WORD = NULL_CHAR
+UNKNOWN_WORD = UNKNOWN_CHAR
 
 
 # functions
 
-def word_list_to_int_list(word_list):
-  return [word_list_to_int_list(elem) for elem in word_list] \
-         if isinstance(word_list, list) else \
-         [ord(char) for char in word_list]
+## utils
+
+def array(sequence):
+  return numpy.array(list(sequence))
 
 
-def format_int_list(the_list, sizes):
-  assert all(isinstance(hier, int) and hier > 0 for hier in sizes.keys())
+## word indices
+
+def create_word_indices(documents):
+  words = {word
+           for document in documents
+           for sentence in document
+           for word in sentence} \
+          | {NULL_WORD, UNKNOWN_WORD}
+
+  return {word : index for index, word in enumerate(sorted(words))}
+
+
+## word array
+
+def create_word_array(word_indices, word_length):
+  word_array = numpy.zeros((len(word_indices), word_length))
+
+  for word, index in word_indices.items():
+    word_array[index] = word_to_array(word, word_length)
+
+  return word_array
+
+
+def word_to_array(word, word_length):
+  return array(ord(char) for char in format_word(word, word_length))
+
+
+def format_word(word, word_length):
+  return word[:word_length] if len(word) >= word_length else \
+         word + NULL_CHAR * (word_length - len(word))
+
+
+## document array
+
+def create_document_array(documents,
+                          word_indices,
+                          sentence_length,
+                          document_length):
+  return array(format_int_list(
+    [[[word_to_index(word, word_indices)
+       for word in sentence]
+      for sentence in document]
+     for document in documents],
+    {
+      1 : sentence_length,
+      2 : document_length,
+      3 : None,
+    },
+    word_indices[NULL_WORD],
+  ))
+
+
+def word_to_index(word, word_indices):
+  return word_indices[word] if word in word_indices else \
+         word_indices[UNKNOWN_WORD]
+
+
+## int list
+
+def format_int_list(the_list, lengths, null_int):
+  assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
 
   if not isinstance(the_list, list):
     return the_list
 
-  hier = hierarchy(the_list)
-  size = sizes[hier]
-
-  formated_sub_lists = [format_int_list(sub_list, sizes)
+  formated_sub_lists = [format_int_list(sub_list, lengths, null_int)
                         for sub_list in the_list]
 
-  return formated_sub_lists[:size] \
-         if len(the_list) >= size else \
-         formated_sub_lists + [dummy(hier - 1, sizes)] * (size - len(the_list))
+  hier = hierarchy(the_list)
+  length = lengths[hier]
+
+  if length is None:
+    return formated_sub_lists
+
+  return formated_sub_lists[:length] \
+         if len(the_list) >= length else \
+         formated_sub_lists + [dummy(hier - 1, lengths, null_int)] \
+                              * (length - len(the_list))
 
 
-def dummy(hier, sizes):
-  return NULL_CHAR if hier == 0 else [dummy(hier - 1, sizes)] * sizes[hier]
+def dummy(hier, lengths, null_int):
+  return null_int if hier == 0 else \
+         [dummy(hier - 1, lengths, null_int)] * lengths[hier]
 
 
 def hierarchy(the_list):
@@ -50,15 +118,6 @@ def hierarchy(the_list):
   return hierarchy(the_list[0]) + 1
 
 
-def format_document(document, sizes):
-  return format_int_list(word_list_to_int_list(document), sizes)
-
-
-def repeat(x):
-  while True:
-    yield x
-
-
 
 # main routine
 
@@ -66,31 +125,38 @@ def main(args):
   """
   Usage:
     json2array -w <length> -s <length> -d <length>
-               [<json_document_filename>] <numpy_array_file>
+               --word-array-file <file>
+               --document-array-file <file>
+               [<json_document_file>]
 
   Options:
-    -w --max-word-length <word_length>
-    -s --max-sentence-length <sentence_length>
-    -d --max-document-length <document_length>
+    -w --word-length <length>
+    -s --sentence-length <length>
+    -d --document-length <length>
     -h --help
   """
 
-  if args["<json_document_filename>"] is not None:
-    with open(args["<json_document_filename>"]) as file:
+  if args["<json_document_file>"] is not None:
+    with open(args["<json_document_file>"]) as file:
       json_documents = file.read()
   else:
     json_documents = sys.stdin.read()
 
-  sizes = {
-    1 : int(args["--max-word-length"]),
-    2 : int(args["--max-sentence-length"]),
-    3 : int(args["--max-document-length"]),
-  }
+  documents = json.loads(json_documents)
 
-  numpy.array(multiprocessing.Pool().starmap(
-    format_document,
-    zip(json.loads(json_documents), repeat(sizes)))
-  ).dump(args["<numpy_array_file>"])
+  word_indices = create_word_indices(documents)
+
+  create_word_array(
+    word_indices,
+    word_length=int(args["--word-length"]),
+  ).dump(args["--word-array-file"])
+
+  create_document_array(
+    documents,
+    word_indices,
+    sentence_length=int(args["--sentence-length"]),
+    document_length=int(args["--document-length"]),
+  ).dump(args["--document-array-file"])
 
 
 if __name__ == "__main__":
