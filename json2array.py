@@ -2,7 +2,6 @@
 
 import docopt
 import json
-import multiprocessing
 import numpy
 import sys
 
