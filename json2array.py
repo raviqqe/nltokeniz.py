@@ -60,6 +60,11 @@ def format_word(word, word_length):
          word + NULL_CHAR * (word_length - len(word))
 
 
+def save_word_array(filename, word_indices, *, word_length):
+  if filename is not None:
+    create_word_array(word_indices, word_length=word_length).dump(filename)
+
+
 ## document array
 
 def create_document_array(documents,
@@ -83,6 +88,11 @@ def create_document_array(documents,
 def word_to_index(word, word_indices):
   return word_indices[word] if word in word_indices else \
          word_indices[UNKNOWN_WORD]
+
+
+def save_document_array(filename, *args, **kwargs):
+  if filename is not None:
+    create_document_array(*args, **kwargs).dump(filename)
 
 
 ## int list
@@ -149,17 +159,15 @@ def main(args):
 
   word_indices = create_word_indices(documents)
 
-  create_word_array(
-    word_indices,
-    word_length=int(args["--word-length"]),
-  ).dump(args["--word-array-file"])
+  save_word_array(args["--word-array-file"],
+                  word_indices,
+                  word_length=int(args["--word-length"]))
 
-  create_document_array(
-    documents,
-    word_indices,
-    sentence_length=int(args["--sentence-length"]),
-    document_length=int(args["--document-length"]),
-  ).dump(args["--document-array-file"])
+  save_document_array(args["--document-array-file"],
+                      documents,
+                      word_indices,
+                      sentence_length=int(args["--sentence-length"]),
+                      document_length=int(args["--document-length"]))
 
 
 if __name__ == "__main__":
