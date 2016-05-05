@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import docopt
+import argparse
 import json
 import numpy
 import sys
@@ -131,26 +131,24 @@ def hierarchy(the_list):
   return hierarchy(the_list[0]) + 1
 
 
+def get_args():
+  arg_parser = argparse.ArgumentParser()
+  arg_parser.add_argument("-w", "--word-length", type=int, required=True)
+  arg_parser.add_argument("-s", "--sentence-length", type=int, required=True)
+  arg_parser.add_argument("-d", "--document-length", type=int, required=True)
+  arg_parser.add_argument("--word-array-file")
+  arg_parser.add_argument("--document-array-file", required=True)
+  arg_parser.add_argument("json_document_file", nargs="?")
+  return arg_parser.parse_args()
+
 
 # main routine
 
-def main(args):
-  """
-  Usage:
-    json2array -w <length> -s <length> -d <length>
-               --word-array-file <file>
-               --document-array-file <file>
-               [<json_document_file>]
+def main():
+  args = get_args()
 
-  Options:
-    -w --word-length <length>
-    -s --sentence-length <length>
-    -d --document-length <length>
-    -h --help
-  """
-
-  if args["<json_document_file>"] is not None:
-    with open(args["<json_document_file>"]) as file:
+  if args.json_document_file is not None:
+    with open(args.json_document_file) as file:
       json_documents = file.read()
   else:
     json_documents = sys.stdin.read()
@@ -159,16 +157,16 @@ def main(args):
 
   word_indices = create_word_indices(documents)
 
-  save_word_array(args["--word-array-file"],
+  save_word_array(args.word_array_file,
                   word_indices,
-                  word_length=int(args["--word-length"]))
+                  word_length=args.word_length)
 
-  save_document_array(args["--document-array-file"],
+  save_document_array(args.document_array_file,
                       documents,
                       word_indices,
-                      sentence_length=int(args["--sentence-length"]),
-                      document_length=int(args["--document-length"]))
+                      sentence_length=args.sentence_length,
+                      document_length=args.document_length)
 
 
 if __name__ == "__main__":
-  main(docopt.docopt(main.__doc__))
+  main()
