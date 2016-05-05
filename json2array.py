@@ -54,6 +54,22 @@ def create_word_indices(documents):
                             | {NULL_WORD, UNKNOWN_WORD})
 
 
+## character array
+
+def create_char_array(char_indices):
+  char_array = numpy.zeros((len(char_indices),), dtype=CHAR_DATATYPE)
+
+  for char, index in char_indices.items():
+    char_array[index] = ord(char)
+
+  return char_array
+
+
+def save_char_array(filename, char_indices):
+  if filename is not None:
+    create_char_array(char_indices).dump(filename)
+
+
 ## word array
 
 def create_word_array(word_indices, word_length, char_indices):
@@ -153,6 +169,7 @@ def get_args():
   arg_parser.add_argument("-w", "--word-length", type=int, required=True)
   arg_parser.add_argument("-s", "--sentence-length", type=int, required=True)
   arg_parser.add_argument("-d", "--document-length", type=int, required=True)
+  arg_parser.add_argument("--character-array-file")
   arg_parser.add_argument("--word-array-file")
   arg_parser.add_argument("--document-array-file", required=True)
   arg_parser.add_argument("json_document_file", nargs="?")
@@ -173,8 +190,9 @@ def main():
   documents = json.loads(json_documents)
 
   char_indices = create_char_indices(documents)
-  word_indices = create_word_indices(documents)
+  save_char_array(args.character_array_file, char_indices)
 
+  word_indices = create_word_indices(documents)
   save_word_array(args.word_array_file,
                   word_indices,
                   word_length=args.word_length,
