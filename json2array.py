@@ -15,7 +15,8 @@ UNKNOWN_CHAR = '\x01'
 NULL_WORD = NULL_CHAR
 UNKNOWN_WORD = UNKNOWN_CHAR
 
-CHAR_DATATYPE = numpy.int32
+CHAR_DATATYPE = numpy.uint32
+INDEX_DATATYPE = numpy.int32
 
 
 
@@ -23,8 +24,8 @@ CHAR_DATATYPE = numpy.int32
 
 ## utils
 
-def array(sequence):
-  return numpy.array(list(sequence), dtype=CHAR_DATATYPE)
+def array(sequence, dtype=INDEX_DATATYPE):
+  return numpy.array(list(sequence), dtype=dtype)
 
 
 def documents_to_words(documents):
@@ -74,7 +75,7 @@ def save_char_array(filename, char_indices):
 
 def create_word_array(word_indices, word_length, char_indices):
   word_array = numpy.zeros((len(word_indices), word_length),
-                           dtype=CHAR_DATATYPE)
+                           dtype=INDEX_DATATYPE)
 
   for word, index in word_indices.items():
     word_array[index] = word_to_array(word, word_length, char_indices)
