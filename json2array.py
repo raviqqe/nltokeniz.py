@@ -105,18 +105,19 @@ def create_document_array(documents,
                           word_indices,
                           sentence_length,
                           document_length):
-  return array(align_int_list(
-    [[[word_to_index(word, word_indices)
-       for word in sentence]
-      for sentence in document]
-     for document in documents],
+  aligner = ListAligner(
     {
       1 : sentence_length,
       2 : document_length,
       3 : None,
     },
     word_indices[NULL_WORD],
-  ))
+  )
+
+  return array(aligner.align([[[word_to_index(word, word_indices)
+                                for word in sentence]
+                               for sentence in document]
+                              for document in documents]))
 
 
 def word_to_index(word, word_indices):
@@ -129,40 +130,45 @@ def save_document_array(filename, *args, **kwargs):
     create_document_array(*args, **kwargs).dump(filename)
 
 
-## int list
+## list aligner
 
-def align_int_list(list_, lengths, null_int):
-  assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
+class ListAligner:
+  def __init__(self, lengths, bottom_dummy):
+    assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
 
-  if not isinstance(list_, list):
-    return list_
+    self._lengths = lengths # hier -> length
+    self._dummies = {0 : bottom_dummy} # hier -> dummy
 
-  aligned_sub_lists = [align_int_list(sub_list, lengths, null_int)
-                        for sub_list in list_]
+  def _dummy(self, hier):
+    if hier in self._dummies:
+      return self._dummies[hier]
 
-  hier = hierarchy(list_)
-  length = lengths[hier]
+    assert hier != 0
+    self._dummies[hier] = [self._dummy(hier - 1)] * self._lengths[hier]
+    return self._dummies[hier]
 
-  if length is None:
-    return aligned_sub_lists
+  def align(self, list_):
+    if not isinstance(list_, list):
+      return list_
 
-  return aligned_sub_lists[:length] \
-         if len(list_) >= length else \
-         aligned_sub_lists + [dummy(hier - 1, lengths, null_int)] \
-                              * (length - len(list_))
+    aligned_sub_lists = [self.align(sub_list) for sub_list in list_]
 
+    hier = self._hier(list_)
+    length = self._lengths[hier]
 
-def dummy(hier, lengths, null_int):
-  return null_int if hier == 0 else \
-         [dummy(hier - 1, lengths, null_int)] * lengths[hier]
+    if length is None:
+      return aligned_sub_lists
 
+    return aligned_sub_lists[:length] \
+           if len(list_) >= length else \
+           aligned_sub_lists + self._dummy(hier)[:length - len(list_)]
 
-def hierarchy(list_):
-  if not isinstance(list_, list):
-    return 0
+  def _hier(self, list_):
+    if not isinstance(list_, list):
+      return 0
 
-  assert all(hierarchy(elem) == hierarchy(list_[0]) for elem in list_)
-  return hierarchy(list_[0]) + 1
+    assert all(self._hier(elem) == self._hier(list_[0]) for elem in list_)
+    return self._hier(list_[0]) + 1
 
 
 def get_args():
