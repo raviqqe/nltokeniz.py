@@ -177,18 +177,20 @@ def get_args():
   return arg_parser.parse_args()
 
 
+def get_json_documents(filename):
+  if filename is not None:
+    with open(filename) as file_:
+      return json.load(file_)
+  return json.load(sys.stdin)
+
+
+
 # main routine
 
 def main():
   args = get_args()
 
-  if args.json_document_file is not None:
-    with open(args.json_document_file) as file:
-      json_documents = file.read()
-  else:
-    json_documents = sys.stdin.read()
-
-  documents = json.loads(json_documents)
+  documents = get_json_documents(args.json_document_file)
 
   char_indices = create_char_indices(documents)
   save_char_array(args.character_array_file, char_indices)
