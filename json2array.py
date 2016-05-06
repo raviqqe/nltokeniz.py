@@ -77,8 +77,10 @@ def save_char_array(filename, char_indices):
 
 ## word array
 
-def create_word_array(word_indices, word_length, char_indices):
-  aligner = ListAligner({1 : word_length, 2 : None}, char_indices[NULL_CHAR])
+def create_word_array(word_indices, word_length, char_indices, centerize):
+  aligner = ListAligner({1 : word_length, 2 : None},
+                        char_indices[NULL_CHAR],
+                        centerize)
 
   return array(aligner.align(
       [[char_to_index(char, char_indices)
@@ -91,11 +93,17 @@ def char_to_index(char, char_indices):
          char_indices[UNKNOWN_CHAR]
 
 
-def save_word_array(filename, word_indices, *, word_length, char_indices):
+def save_word_array(filename,
+                    word_indices,
+                    *,
+                    word_length,
+                    char_indices,
+                    centerize):
   if filename is not None:
     create_word_array(word_indices,
                       word_length=word_length,
-                      char_indices=char_indices).dump(filename)
+                      char_indices=char_indices,
+                      centerize=centerize).dump(filename)
 
 
 ## document array
@@ -104,7 +112,8 @@ def create_document_array(documents,
                           word_indices,
                           *,
                           sentence_length,
-                          document_length):
+                          document_length,
+                          centerize):
   aligner = ListAligner(
     {
       1 : sentence_length,
@@ -112,6 +121,7 @@ def create_document_array(documents,
       3 : None,
     },
     word_indices[NULL_WORD],
+    centerize,
   )
 
   return array(aligner.align([[[word_to_index(word, word_indices)
@@ -133,11 +143,12 @@ def save_document_array(filename, *args, **kwargs):
 ## list aligner
 
 class ListAligner:
-  def __init__(self, lengths, bottom_dummy):
+  def __init__(self, lengths, bottom_dummy, centerize):
     assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
 
     self._lengths = lengths # hier -> length
     self._dummies = {0 : bottom_dummy} # hier -> dummy
+    self._centerize = centerize
 
   def _dummy(self, hier):
     if hier in self._dummies:
@@ -164,7 +175,11 @@ class ListAligner:
   def _align_list_of_aligned_sub_lists(self, list_):
     hier = self._hier(list_)
     length = self._lengths[hier]
-    return list_[:length] + self._dummy(hier)[:max(length - len(list_), 0)]
+    dummy_head, dummy_tail \
+        = self._split_in_half(self._dummy(hier)[:max(length - len(list_), 0)])
+    return dummy_head + list_[:length] + dummy_tail \
+           if self._centerize else \
+           list_[:length] + dummy_head + dummy_tail
 
   def _hier(self, list_):
     if not isinstance(list_, list):
@@ -173,12 +188,18 @@ class ListAligner:
     assert all(self._hier(elem) == self._hier(list_[0]) for elem in list_)
     return self._hier(list_[0]) + 1
 
+  @staticmethod
+  def _split_in_half(list_):
+    half_length = len(list_) // 2
+    return list_[:half_length], list_[half_length:]
+
 
 def get_args():
   arg_parser = argparse.ArgumentParser()
   arg_parser.add_argument("-w", "--word-length", type=int, required=True)
   arg_parser.add_argument("-s", "--sentence-length", type=int, required=True)
   arg_parser.add_argument("-d", "--document-length", type=int, required=True)
+  arg_parser.add_argument("--centerize", action="store_true")
   arg_parser.add_argument("--character-array-file")
   arg_parser.add_argument("--word-array-file")
   arg_parser.add_argument("--document-array-file", required=True)
@@ -208,13 +229,15 @@ def main():
   save_word_array(args.word_array_file,
                   word_indices,
                   word_length=args.word_length,
-                  char_indices=char_indices)
+                  char_indices=char_indices,
+                  centerize=args.centerize)
 
   save_document_array(args.document_array_file,
                       documents,
                       word_indices,
                       sentence_length=args.sentence_length,
-                      document_length=args.document_length)
+                      document_length=args.document_length,
+                      centerize=args.centerize)
 
 
 if __name__ == "__main__":
