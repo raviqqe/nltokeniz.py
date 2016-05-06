@@ -84,10 +84,10 @@ def create_word_array(word_indices, word_length, char_indices):
 
 
 def word_to_array(word, word_length, char_indices):
-  return array(char_indices[char] for char in format_word(word, word_length))
+  return array(char_indices[char] for char in align_word(word, word_length))
 
 
-def format_word(word, word_length):
+def align_word(word, word_length):
   return word[:word_length] if len(word) >= word_length else \
          word + NULL_CHAR * (word_length - len(word))
 
@@ -105,7 +105,7 @@ def create_document_array(documents,
                           word_indices,
                           sentence_length,
                           document_length):
-  return array(format_int_list(
+  return array(align_int_list(
     [[[word_to_index(word, word_indices)
        for word in sentence]
       for sentence in document]
@@ -131,24 +131,24 @@ def save_document_array(filename, *args, **kwargs):
 
 ## int list
 
-def format_int_list(the_list, lengths, null_int):
+def align_int_list(the_list, lengths, null_int):
   assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
 
   if not isinstance(the_list, list):
     return the_list
 
-  formated_sub_lists = [format_int_list(sub_list, lengths, null_int)
+  aligned_sub_lists = [align_int_list(sub_list, lengths, null_int)
                         for sub_list in the_list]
 
   hier = hierarchy(the_list)
   length = lengths[hier]
 
   if length is None:
-    return formated_sub_lists
+    return aligned_sub_lists
 
-  return formated_sub_lists[:length] \
+  return aligned_sub_lists[:length] \
          if len(the_list) >= length else \
-         formated_sub_lists + [dummy(hier - 1, lengths, null_int)] \
+         aligned_sub_lists + [dummy(hier - 1, lengths, null_int)] \
                               * (length - len(the_list))
 
 
