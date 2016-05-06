@@ -66,12 +66,8 @@ def create_word_indices(documents):
 ## character array
 
 def create_char_array(char_indices):
-  char_array = numpy.zeros((len(char_indices),), dtype=CHAR_DATATYPE)
-
-  for char, index in char_indices.items():
-    char_array[index] = ord(char)
-
-  return char_array
+  return array([ord(char) for char in elem_indices_to_elem_list(char_indices)],
+               dtype=CHAR_DATATYPE)
 
 
 def save_char_array(filename, char_indices):
