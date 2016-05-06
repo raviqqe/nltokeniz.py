@@ -102,6 +102,7 @@ def save_word_array(filename, word_indices, *, word_length, char_indices):
 
 def create_document_array(documents,
                           word_indices,
+                          *,
                           sentence_length,
                           document_length):
   aligner = ListAligner(
