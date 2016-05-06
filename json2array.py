@@ -159,9 +159,12 @@ class ListAligner:
     if length is None:
       return aligned_sub_lists
 
-    return aligned_sub_lists[:length] \
-           if len(list_) >= length else \
-           aligned_sub_lists + self._dummy(hier)[:length - len(list_)]
+    return self._align_list_of_aligned_sub_lists(aligned_sub_lists)
+
+  def _align_list_of_aligned_sub_lists(self, list_):
+    hier = self._hier(list_)
+    length = self._lengths[hier]
+    return list_[:length] + self._dummy(hier)[:max(length - len(list_), 0)]
 
   def _hier(self, list_):
     if not isinstance(list_, list):
