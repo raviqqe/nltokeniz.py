@@ -43,6 +43,14 @@ def index_elems_in_set(elems):
   return {elem : index for index, elem in enumerate(sorted(elems))}
 
 
+def sort_by_value(dictionary):
+  return sorted(dictionary.items(), key=lambda x: x[1])
+
+
+def elem_indices_to_elem_list(elem_indices):
+  return [elem for elem, _ in sort_by_value(elem_indices)]
+
+
 ## indices
 
 def create_char_indices(documents):
@@ -74,22 +82,17 @@ def save_char_array(filename, char_indices):
 ## word array
 
 def create_word_array(word_indices, word_length, char_indices):
-  word_array = numpy.zeros((len(word_indices), word_length),
-                           dtype=INDEX_DATATYPE)
+  aligner = ListAligner({1 : word_length, 2 : None}, char_indices[NULL_CHAR])
 
-  for word, index in word_indices.items():
-    word_array[index] = word_to_array(word, word_length, char_indices)
-
-  return word_array
-
-
-def word_to_array(word, word_length, char_indices):
-  return array(char_indices[char] for char in align_word(word, word_length))
+  return array(aligner.align(
+      [[char_to_index(char, char_indices)
+        for char in word]
+       for word in elem_indices_to_elem_list(word_indices)]))
 
 
-def align_word(word, word_length):
-  return word[:word_length] if len(word) >= word_length else \
-         word + NULL_CHAR * (word_length - len(word))
+def char_to_index(char, char_indices):
+  return char_indices[char] if char in char_indices else \
+         char_indices[UNKNOWN_CHAR]
 
 
 def save_word_array(filename, word_indices, *, word_length, char_indices):
