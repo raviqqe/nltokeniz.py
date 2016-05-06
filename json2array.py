@@ -131,25 +131,25 @@ def save_document_array(filename, *args, **kwargs):
 
 ## int list
 
-def align_int_list(the_list, lengths, null_int):
+def align_int_list(list_, lengths, null_int):
   assert all(isinstance(hier, int) and hier > 0 for hier in lengths.keys())
 
-  if not isinstance(the_list, list):
-    return the_list
+  if not isinstance(list_, list):
+    return list_
 
   aligned_sub_lists = [align_int_list(sub_list, lengths, null_int)
-                        for sub_list in the_list]
+                        for sub_list in list_]
 
-  hier = hierarchy(the_list)
+  hier = hierarchy(list_)
   length = lengths[hier]
 
   if length is None:
     return aligned_sub_lists
 
   return aligned_sub_lists[:length] \
-         if len(the_list) >= length else \
+         if len(list_) >= length else \
          aligned_sub_lists + [dummy(hier - 1, lengths, null_int)] \
-                              * (length - len(the_list))
+                              * (length - len(list_))
 
 
 def dummy(hier, lengths, null_int):
@@ -157,12 +157,12 @@ def dummy(hier, lengths, null_int):
          [dummy(hier - 1, lengths, null_int)] * lengths[hier]
 
 
-def hierarchy(the_list):
-  if not isinstance(the_list, list):
+def hierarchy(list_):
+  if not isinstance(list_, list):
     return 0
 
-  assert all(hierarchy(elem) == hierarchy(the_list[0]) for elem in the_list)
-  return hierarchy(the_list[0]) + 1
+  assert all(hierarchy(elem) == hierarchy(list_[0]) for elem in list_)
+  return hierarchy(list_[0]) + 1
 
 
 def get_args():
