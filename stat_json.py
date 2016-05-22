@@ -61,9 +61,11 @@ def main():
   stat_lengths(documents, "documents")
 
   sentences = get_sentences(documents)
+  print()
   stat_lengths(sentences, "sentences")
 
   words = get_words(sentences)
+  print()
   stat_lengths(words, "words")
 
 
