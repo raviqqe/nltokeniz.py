@@ -34,13 +34,16 @@ def filter_by_length(sequences, length):
 
 
 def stat_lengths(sequences, about):
-  print("Total number of {} is:".format(about), len(sequences))
+  total_num = len(sequences)
+  print("Total number of {} is:".format(about), total_num)
 
-  length_to_sequences = group_by_length(sequences)
-
-  for length, sequences in sorted(length_to_sequences.items()):
-    print("Number of {} of length {} is:".format(about, length),
-          len(sequences))
+  sum_of_nums = 0
+  for length, sequences in sorted(group_by_length(sequences).items()):
+    sum_of_nums += len(sequences)
+    print("Number of {} of length {:4} is:".format(about, length),
+          "{:8}".format(len(sequences)),
+          "(ratio: {})".format(sum_of_nums / total_num),
+          sep="\t")
 
 
 
