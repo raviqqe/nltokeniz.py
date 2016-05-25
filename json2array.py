@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import multiprocessing
 import numpy
 import sys
 
@@ -51,6 +52,10 @@ def elem_indices_to_elem_list(elem_indices):
   return [elem for elem, _ in sort_by_value(elem_indices)]
 
 
+def parallel_map(func, sequence):
+  return multiprocessing.Pool().map(func, sequence)
+
+
 ## indices
 
 def create_char_indices(documents):
@@ -82,9 +87,9 @@ def create_word_array(word_indices, word_length, char_indices, centerize):
                         char_indices[NULL_CHAR],
                         centerize)
 
-  return array(aligner.align(
-      [[char_to_index(char, char_indices)
-        for char in word]
+  return array(parallel_map(
+      aligner.align,
+      [[char_to_index(char, char_indices) for char in word]
        for word in elem_indices_to_elem_list(word_indices)]))
 
 
@@ -124,10 +129,11 @@ def create_document_array(documents,
     centerize,
   )
 
-  return array(aligner.align([[[word_to_index(word, word_indices)
-                                for word in sentence]
-                               for sentence in document]
-                              for document in documents]))
+  return array(parallel_map(
+      aligner.align,
+      [[[word_to_index(word, word_indices) for word in sentence]
+        for sentence in document]
+       for document in documents]))
 
 
 def word_to_index(word, word_indices):
