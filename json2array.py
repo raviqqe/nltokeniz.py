@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import collections
 import json
 import multiprocessing
 import numpy
@@ -30,14 +31,14 @@ def array(sequence, dtype=INDEX_DATATYPE):
 
 
 def documents_to_words(documents):
-  return {word
+  return [word
           for document in documents
           for sentence in document
-          for word in sentence}
+          for word in sentence]
 
 
 def documents_to_chars(documents):
-  return {char for word in documents_to_words(documents) for char in word}
+  return [char for word in documents_to_words(documents) for char in word]
 
 
 def index_elems_in_set(elems):
@@ -56,16 +57,27 @@ def parallel_map(func, sequence):
   return multiprocessing.Pool().map(func, sequence)
 
 
+def filter_by_counts(sequence, min_freq):
+  return {elem for elem, freq in collections.Counter(list(sequence)).items()
+          if freq >= min_freq}
+
+
+def create_elem_indices(elems, *, min_freq, kept_elems):
+  return index_elems_in_set(filter_by_counts(elems, min_freq) | kept_elems)
+
+
 ## indices
 
-def create_char_indices(documents):
-  return index_elems_in_set(documents_to_chars(documents)
-                            | {NULL_CHAR, UNKNOWN_CHAR})
+def create_char_indices(documents, min_freq):
+  return create_elem_indices(documents_to_chars(documents),
+                             min_freq=min_freq,
+                             kept_elems={NULL_CHAR, UNKNOWN_CHAR})
 
 
-def create_word_indices(documents):
-  return index_elems_in_set(documents_to_words(documents)
-                            | {NULL_WORD, UNKNOWN_WORD})
+def create_word_indices(documents, min_freq):
+  return create_elem_indices(documents_to_words(documents),
+                             min_freq=min_freq,
+                             kept_elems={NULL_WORD, UNKNOWN_WORD})
 
 
 ## character array
@@ -206,6 +218,8 @@ def get_args():
   arg_parser.add_argument("-s", "--sentence-length", type=int, required=True)
   arg_parser.add_argument("-d", "--document-length", type=int, required=True)
   arg_parser.add_argument("--centerize", action="store_true")
+  arg_parser.add_argument("--character-min-freq", type=int, default=1)
+  arg_parser.add_argument("--word-min-freq", type=int, default=1)
   arg_parser.add_argument("--character-array-file")
   arg_parser.add_argument("--word-array-file")
   arg_parser.add_argument("--document-array-file", required=True)
@@ -228,10 +242,11 @@ def main():
 
   documents = get_json_documents(args.json_document_file)
 
-  char_indices = create_char_indices(documents)
+  char_indices = create_char_indices(documents,
+                                     min_freq=args.character_min_freq)
   save_char_array(args.character_array_file, char_indices)
 
-  word_indices = create_word_indices(documents)
+  word_indices = create_word_indices(documents, min_freq=args.word_min_freq)
   save_word_array(args.word_array_file,
                   word_indices,
                   word_length=args.word_length,
