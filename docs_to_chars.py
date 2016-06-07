@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 
-from docer import print_as_json, \
+from lib import print_as_json, \
                 create_elem_list, \
                 documents_to_chars, \
                 NULL_CHAR, \
