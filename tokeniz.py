@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import docopt
-import json
+import argparse
 import multiprocessing
 import nltk
 import re
 import sys
 
+from lib import print_as_json
 
 
-# functions
 
 def tokenize_document(document):
   return [nltk.tokenize.word_tokenize(sentence)
@@ -24,26 +23,18 @@ def remove_tags(string):
   return re.sub(r"<\s*br\s*/?\s*>", r" ", string)
 
 
+def get_args():
+  arg_parser = argparse.ArgumentParser()
+  arg_parser.add_argument("document_file",
+                          type=argparse.FileType(),
+                          default=sys.stdin)
+  return arg_parser.parse_args()
 
-# main routine
 
-def main(args):
-  """
-  Usage:
-    doc2json [<document_filename>]
-
-  Options:
-    -h --help Show help.
-  """
-
-  if args["<document_filename>"] is not None:
-    with open(args["<document_filename>"]) as file:
-      documents = file.readlines()
-  else:
-    documents = sys.stdin.readlines()
-
-  print(json.dumps(tokenize_documents(documents)))
+def main():
+  args = get_args()
+  print_as_json(tokenize_documents(args.document_file.readlines()))
 
 
 if __name__ == "__main__":
-  main(docopt.docopt(main.__doc__))
+  main()
