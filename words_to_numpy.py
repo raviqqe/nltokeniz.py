@@ -28,7 +28,7 @@ def char_to_index(char, char_index):
 def get_args():
   arg_parser = argparse.ArgumentParser()
   arg_parser.add_argument("-c", "--centerize", action="store_true")
-  arg_parser.add_argument("-l", "--word-length", type=int, required=True)
+  arg_parser.add_argument("-w", "--word-length", type=int, required=True)
   arg_parser.add_argument("--json-char-file",
                           type=argparse.FileType(),
                           required=True)
