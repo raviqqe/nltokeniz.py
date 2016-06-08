@@ -19,9 +19,10 @@ def get_args():
 
 def main():
   args = get_args()
-  numpy.save(args.numpy_char_file, numpy.array(
-      [ord(char) for char in json.load(args.json_char_file)],
-      dtype=numpy.uint32))
+  numpy.save(
+      args.numpy_char_file,
+      numpy.array([ord(char) for char in json.load(args.json_char_file)],
+                  dtype=numpy.uint32))
 
 
 if __name__ == "__main__":
