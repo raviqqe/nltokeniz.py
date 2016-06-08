@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import multiprocessing
 import nltk
 import re
 import sys
-
-from lib import print_as_json
 
 
 
@@ -29,7 +28,8 @@ def get_args():
 
 def main():
   args = get_args()
-  print_as_json(tokenize_documents(args.document_file.readlines()))
+  print(json.dumps(tokenize_documents(args.document_file.readlines()),
+                   indent="\t"))
 
 
 if __name__ == "__main__":
