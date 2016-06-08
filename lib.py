@@ -13,21 +13,16 @@ UNKNOWN_CHAR = '\x01'
 NULL_WORD = NULL_CHAR
 UNKNOWN_WORD = UNKNOWN_CHAR
 
-CHAR_DATATYPE = numpy.uint32
-INDEX_DATATYPE = numpy.int32
-
 
 
 # functions
-
-## utils
 
 def print_as_json(obj):
   print(json.dumps(obj, indent="\t"))
 
 
-def array(sequence, dtype=INDEX_DATATYPE):
-  return numpy.array(list(sequence), dtype=dtype)
+def array(sequence):
+  return numpy.array(list(sequence), dtype=numpy.int32)
 
 
 def documents_to_words(documents):
@@ -55,77 +50,12 @@ def filter_by_freq(elems, min_freq):
           if freq >= min_freq}
 
 
-def create_elem_indices(elems, *, min_freq, kept_elems):
-  return index_elems_in_set(filter_by_freq(elems, min_freq) | kept_elems)
-
-
-## indices
-
-def create_char_indices(documents, min_freq):
-  return create_elem_indices(documents_to_chars(documents),
-                             min_freq=min_freq,
-                             kept_elems={NULL_CHAR, UNKNOWN_CHAR})
-
-
-def create_word_indices(documents, min_freq):
-  return create_elem_indices(documents_to_words(documents),
-                             min_freq=min_freq,
-                             kept_elems={NULL_WORD, UNKNOWN_WORD})
-
-
 def create_elem_list(elems, *, min_freq, kept_elems):
   return sorted(filter_by_freq(elems, min_freq) | kept_elems)
 
 
 
-## character array
-
-def create_char_array(char_indices):
-  return array([ord(char) for char in elem_indices_to_elem_list(char_indices)],
-               dtype=CHAR_DATATYPE)
-
-
-def save_char_array(filename, char_indices):
-  if filename is not None:
-    create_char_array(char_indices).dump(filename)
-
-
-## document array
-
-def create_document_array(documents,
-                          word_indices,
-                          *,
-                          sentence_length,
-                          document_length,
-                          centerize):
-  aligner = ListAligner(
-    {
-      1 : sentence_length,
-      2 : document_length,
-      3 : None,
-    },
-    word_indices[NULL_WORD],
-    centerize,
-  )
-
-  return array(parallel_map(
-      aligner.align,
-      [[[word_to_index(word, word_indices) for word in sentence]
-        for sentence in document]
-       for document in documents]))
-
-
-def word_to_index(word, word_indices):
-  return word_indices[word] if word in word_indices else \
-         word_indices[UNKNOWN_WORD]
-
-
-def save_document_array(filename, *args, **kwargs):
-  if filename is not None:
-    create_document_array(*args, **kwargs).dump(filename)
-
-
-## list aligner
+## classes
 
 class ListAligner:
   def __init__(self, lengths, bottom_dummy, centerize):
