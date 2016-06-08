@@ -12,15 +12,11 @@ from lib import print_as_json
 
 def tokenize_document(document):
   return [nltk.tokenize.word_tokenize(sentence)
-          for sentence in nltk.tokenize.sent_tokenize(remove_tags(document))]
+          for sentence in nltk.tokenize.sent_tokenize(document)]
 
 
 def tokenize_documents(documents):
   return multiprocessing.Pool().map(tokenize_document, documents)
-
-
-def remove_tags(string):
-  return re.sub(r"<\s*br\s*/?\s*>", r" ", string)
 
 
 def get_args():
