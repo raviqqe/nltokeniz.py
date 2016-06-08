@@ -90,37 +90,6 @@ def save_char_array(filename, char_indices):
     create_char_array(char_indices).dump(filename)
 
 
-## word array
-
-def create_word_array(word_indices, word_length, char_indices, centerize):
-  aligner = ListAligner({1 : word_length, 2 : None},
-                        char_indices[NULL_CHAR],
-                        centerize)
-
-  return array(parallel_map(
-      aligner.align,
-      [[char_to_index(char, char_indices) for char in word]
-       for word in elem_indices_to_elem_list(word_indices)]))
-
-
-def char_to_index(char, char_indices):
-  return char_indices[char] if char in char_indices else \
-         char_indices[UNKNOWN_CHAR]
-
-
-def save_word_array(filename,
-                    word_indices,
-                    *,
-                    word_length,
-                    char_indices,
-                    centerize):
-  if filename is not None:
-    create_word_array(word_indices,
-                      word_length=word_length,
-                      char_indices=char_indices,
-                      centerize=centerize).dump(filename)
-
-
 ## document array
 
 def create_document_array(documents,
