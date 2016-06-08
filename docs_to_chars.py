@@ -20,7 +20,7 @@ def create_char_list(documents, min_freq):
 
 def get_args():
   arg_parser = argparse.ArgumentParser()
-  arg_parser.add_argument("--min-freq", type=int, default=1)
+  arg_parser.add_argument("-f", "--min-freq", type=int, default=1)
   arg_parser.add_argument("json_document_file",
                           type=argparse.FileType(),
                           nargs="?",
