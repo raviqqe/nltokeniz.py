@@ -5,13 +5,13 @@ import json
 import numpy
 import sys
 
-from lib import list_to_index, array, parallel_map, ListAligner, NULL_CHAR
+from lib import list_to_index, array, parallel_map, ListAligner, \
+                NULL_CHAR, UNKNOWN_CHAR
 
 
 
 def create_word_array(words, *, word_length, chars, centerize):
   char_index = list_to_index(chars)
-
   aligner = ListAligner({1 : word_length, 2 : None},
                         char_index[NULL_CHAR],
                         centerize)
@@ -22,8 +22,7 @@ def create_word_array(words, *, word_length, chars, centerize):
 
 
 def char_to_index(char, char_index):
-  return char_index[char] if char in char_index else \
-         char_index[UNKNOWN_CHAR]
+  return char_index[char] if char in char_index else char_index[UNKNOWN_CHAR]
 
 
 def get_args():
@@ -46,8 +45,8 @@ def main():
   numpy.save(args.numpy_word_file,
              create_word_array(
                  json.load(args.json_word_file),
-                 word_length=args.word_length,
                  chars=json.load(args.json_char_file),
+                 word_length=args.word_length,
                  centerize=args.centerize))
 
 
