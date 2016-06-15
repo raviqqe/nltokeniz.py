@@ -4,7 +4,6 @@ import argparse
 import json
 import multiprocessing
 import nltk
-import re
 import sys
 import MeCab
 
