@@ -26,7 +26,6 @@ def sentence_to_words_in_japanese(sentence):
     node = node.next
 
 
-
 class DocumentTokenizer:
   def __init__(self, language):
     self._language = language
