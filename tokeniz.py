@@ -12,6 +12,7 @@ import MeCab
 
 encoding = "UTF-8"
 japanese_tagger = MeCab.Tagger()
+japanese_tagger.parse("") # prevent UnicodeDecodeError
 japanese_sentence_tokenizer \
     = nltk.RegexpTokenizer("[^{0}]+[{0}]+".format("!?.！？。．"))
 
