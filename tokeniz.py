@@ -6,6 +6,23 @@ import multiprocessing
 import nltk
 import re
 import sys
+import MeCab
+
+
+
+encoding = "UTF-8"
+japanese_tagger = MeCab.Tagger()
+japanese_sentence_tokenizer \
+    = nltk.RegexpTokenizer("[^{0}]+[{0}]+".format("!?.！？。．"))
+
+
+
+def sentence_to_words_in_japanese(sentence):
+  node = japanese_tagger.parseToNode(sentence)
+  while node != None:
+    if node.surface != "":
+      yield node.surface
+    node = node.next
 
 
 
@@ -24,7 +41,8 @@ class DocumentTokenizer:
             for sentence in nltk.tokenize.sent_tokenize(document)]
 
   def _tokenize_in_japanese(self, document):
-    return
+    return [list(sentence_to_words_in_japanese(sentence))
+            for sentence in japanese_sentence_tokenizer.tokenize(document)]
 
 
 def tokenize_documents(documents, language):
