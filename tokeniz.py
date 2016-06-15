@@ -12,7 +12,7 @@ import MeCab
 japanese_tagger = MeCab.Tagger()
 japanese_tagger.parse("") # prevent UnicodeDecodeError
 japanese_sentence_tokenizer \
-    = nltk.RegexpTokenizer("[^{0}]+[{0}]+".format("!?.！？。．"))
+    = nltk.RegexpTokenizer("[^{0}]+(?:[{0}]+|$)".format("!?.！？。．"))
 
 
 
@@ -35,12 +35,13 @@ class DocumentTokenizer:
     }[self._language](document)
 
   def _tokenize_in_english(self, document):
-    return [nltk.tokenize.word_tokenize(sentence)
-            for sentence in nltk.tokenize.sent_tokenize(document)]
+    return [nltk.tokenize.word_tokenize(sentence.strip())
+            for sentence in nltk.tokenize.sent_tokenize(document.strip())]
 
   def _tokenize_in_japanese(self, document):
-    return [list(sentence_to_words_in_japanese(sentence))
-            for sentence in japanese_sentence_tokenizer.tokenize(document)]
+    return [list(sentence_to_words_in_japanese(sentence.strip()))
+            for sentence
+            in japanese_sentence_tokenizer.tokenize(document.strip())]
 
 
 def tokenize_documents(documents, language):
