@@ -1,3 +1,3 @@
-from .document_tokenizer import *
+from .tokeniz import *
 
 __version__ = "0.0.0"

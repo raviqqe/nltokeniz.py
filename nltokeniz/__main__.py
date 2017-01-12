@@ -1,18 +1,8 @@
-#!/usr/bin/env python
-
 import argparse
 import json
-import multiprocessing
 import sys
 
-
-def tokenize_documents(documents, language):
-    return multiprocessing.Pool().map(DocumentTokenizer(language).tokenize,
-                                      documents)
-
-
-def print_as_json(obj):
-    print(json.dumps(obj, ensure_ascii=False, indent="\t"))
+from .tokeniz import tokenize
 
 
 def get_args():
@@ -26,8 +16,11 @@ def get_args():
 
 def main():
     args = get_args()
-    print_as_json(tokenize_documents(args.document_file.readlines(),
-                                     language=args.language))
+
+    print(json.dumps(tokenize(args.document_file.read(),
+                              language=args.language),
+                     ensure_ascii=False,
+                     indent="\t"))
 
 
 if __name__ == "__main__":
