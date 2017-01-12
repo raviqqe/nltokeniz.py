@@ -1,0 +1,1 @@
+Smart HTTP is not a protocol but the mechanism for web servers and git to transfer objects over HTTP as fast as git and ssh protocols. It uses git command to pack objects and sends them to clients, which is faster than just using HTTP GET method for each object.
