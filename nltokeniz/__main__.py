@@ -10,7 +10,7 @@ def get_args():
     arg_parser.add_argument('document_file',
                             type=argparse.FileType(),
                             default=sys.stdin)
-    arg_parser.add_argument('-l', '--language')
+    arg_parser.add_argument('-l', '--language', help='Follow ISO 639-1.')
     return arg_parser.parse_args()
 
 
