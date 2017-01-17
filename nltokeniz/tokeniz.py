@@ -18,7 +18,7 @@ def tokenize(document, language=None):
     return {
         'en': tokenize_english,
         'ja': tokenize_japanese,
-    }[language or langdetect.detect(document)](document)
+    }.get(language or langdetect.detect(document), tokenize_english)(document)
 
 
 def tokenize_english(document):

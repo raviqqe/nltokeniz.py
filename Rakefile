@@ -14,6 +14,7 @@ task :test => :clean do
   vsh 'nltokeniz data/foo.en'
   vsh 'nltokeniz -l en data/foo.en'
   vsh 'nltokeniz -l ja data/foo.ja'
+  vsh 'nltokeniz data/foo.what'
 end
 
 
