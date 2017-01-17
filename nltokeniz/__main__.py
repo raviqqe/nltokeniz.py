@@ -7,10 +7,10 @@ from .tokeniz import tokenize
 
 def get_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("document_file",
+    arg_parser.add_argument('document_file',
                             type=argparse.FileType(),
                             default=sys.stdin)
-    arg_parser.add_argument("-l", "--language", default="english")
+    arg_parser.add_argument('-l', '--language')
     return arg_parser.parse_args()
 
 

@@ -6,14 +6,14 @@ def vsh *args
 end
 
 
-task :test do
+task :test => :clean do
   sh "python3 -m venv #{VENV_DIR}"
   vsh 'pip install mecab-python3'
   vsh 'python setup.py install'
   vsh 'python3 -m nltk.downloader punkt'
   vsh 'nltokeniz data/foo.en'
-  vsh 'nltokeniz -l english data/foo.en'
-  vsh 'nltokeniz -l japanese data/foo.ja'
+  vsh 'nltokeniz -l en data/foo.en'
+  vsh 'nltokeniz -l ja data/foo.ja'
 end
 
 

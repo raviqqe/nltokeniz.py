@@ -4,7 +4,7 @@ import setuptools
 
 setuptools.setup(
     name="nltokeniz",
-    version=re.search(r'__version__ *= *"([0-9]+\.[0-9]+\.[0-9]+)" *\n',
+    version=re.search(r"__version__ *= *'([0-9]+\.[0-9]+\.[0-9]+)' *\n",
                       open("nltokeniz/__init__.py").read()).group(1),
     description="Natural language tokenizer for documents in Python",
     long_description=open("README.md").read(),
@@ -16,7 +16,7 @@ setuptools.setup(
     entry_points={
             "console_scripts": ["nltokeniz=nltokeniz.__main__:main"]
     },
-    install_requires=["nltk"],
+    install_requires=["iso639", "langdetect", "nltk"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
