@@ -2,6 +2,7 @@ import iso639
 import langdetect
 import nltk
 import MeCab
+import nlnormaliz
 
 
 __all__ = ['tokenize']
@@ -11,6 +12,8 @@ def tokenize(document, language=None):
     if language is not None and not iso639.is_valid639_1(language):
         raise ValueError('"{}" is not a valid ISO 639-1 code.'
                          .format(language))
+
+    document = nlnormaliz.normalize(document)
 
     return {
         'en': tokenize_english,

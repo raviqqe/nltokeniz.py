@@ -16,7 +16,7 @@ setuptools.setup(
     entry_points={
             "console_scripts": ["nltokeniz=nltokeniz.__main__:main"]
     },
-    install_requires=["iso639", "langdetect", "nltk"],
+    install_requires=["iso639", "langdetect", "nlnormaliz", "nltk"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
