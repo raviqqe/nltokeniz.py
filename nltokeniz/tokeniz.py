@@ -41,7 +41,7 @@ def sentence_to_words_in_japanese(sentence):
 
     node = tagger.parseToNode(sentence)
 
-    while node != None:
+    while node is not None:
         if node.surface != '':
             yield node.surface
 
