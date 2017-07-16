@@ -1,3 +1,4 @@
-from .tokeniz import *
+from .tokeniz import tokenize
 
-__version__ = '0.0.4'
+__all__ = ['tokenize']
+__version__ = '0.0.5'
