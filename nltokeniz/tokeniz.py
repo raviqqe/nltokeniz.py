@@ -18,7 +18,14 @@ def tokenize(document, language=None):
     return {
         'en': tokenize_english,
         'ja': tokenize_japanese,
-    }.get(language or langdetect.detect(document), tokenize_english)(document)
+    }.get(language or detect_language(document), tokenize_english)(document)
+
+
+def detect_language(document):
+    try:
+        return langdetect.detect(document)
+    except:
+        return None
 
 
 def tokenize_english(document):
@@ -41,7 +48,7 @@ def sentence_to_words_in_japanese(sentence):
 
     node = tagger.parseToNode(sentence)
 
-    while node != None:
+    while node is not None:
         if node.surface != '':
             yield node.surface
 
